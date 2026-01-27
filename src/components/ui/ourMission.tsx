@@ -40,6 +40,16 @@ export default function OurMission() {
             <h3 className={`${cormorant.className} text-lg font-semibold text-[var(--foreground)]`}>Mission</h3>
           </div>
         </div>
+
+        {/* Donate CTA */}
+        <div className="mt-14">
+          <p className={`${inter.className} text-[var(--foreground-muted)] mb-4`}>
+            Support our mission
+          </p>
+          <a href="/donate" className="btn-primary">
+            Donate
+          </a>
+        </div>
       </div>
       </section>
     );

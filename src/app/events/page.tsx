@@ -31,17 +31,17 @@ export default function EventsPage() {
 
       {/* Event Images */}
       <section className="py-8 px-4">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* YMG Sundays - first on mobile */}
             <div className="card overflow-hidden">
               <CldImage
                 alt="YMG Sundays Event"
-                src="ymgSundays_sk0zew"
+                src="ymgSundaysPosterJan26_krqkme"
                 width={600}
                 height={600}
                 placeholder="blur"
-                blurDataURL={getBlurDataUrl("ymgSundays_sk0zew")}
+                blurDataURL={getBlurDataUrl("ymgSundaysPosterJan26_krqkme")}
                 className="w-full h-auto"
               />
             </div>
@@ -61,11 +61,11 @@ export default function EventsPage() {
             <div className="card overflow-hidden">
           <CldImage
                 alt="YMG Melbourne Conference 2026"
-                src="ymgMelbConf26_blmot4"
+                src="ymgPowerVertical_w56fyd"
                 width={600}
                 height={600}
                 placeholder="blur"
-                blurDataURL={getBlurDataUrl("ymgMelbConf26_blmot4")}
+                blurDataURL={getBlurDataUrl("ymgPowerVertical_w56fyd")}
                 className="w-full h-auto"
           />
         </div>

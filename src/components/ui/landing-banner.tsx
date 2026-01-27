@@ -30,7 +30,7 @@ export default function LandingBanner() {
           </h1>
           <h1 className={`${cormorant.className} text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gradient tracking-tight mt-2`}>
             OF GOD
-        </h1>
+          </h1>
         </div>
 
         {/* Divider */}
@@ -43,8 +43,8 @@ export default function LandingBanner() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mt-10 opacity-0 animate-fade-in-up animate-delay-500">
-          <a href="#mission" className="btn-primary">
-            Discover Our Mission
+          <a href="/donate" className="btn-primary">
+            Donate
           </a>
           <a href="/events" className="btn-secondary">
             Join an Event

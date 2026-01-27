@@ -61,10 +61,10 @@ export default function ContactPage() {
               Have a specific question or inquiry? Send us an email and we&apos;ll get back to you as soon as possible.
             </p>
             <a 
-              href="mailto:ymgmovement@gmail.com" 
+              href="mailto:ymgmovementaustralia@gmail.com" 
               className="btn-primary inline-block"
             >
-              ymgmovement@gmail.com
+              ymgmovementaustralia@gmail.com
             </a>
           </div>
 
