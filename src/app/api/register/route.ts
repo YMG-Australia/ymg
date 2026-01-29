@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, Registration } from "@/lib/supabase";
-import Stripe from "stripe";
+import { Resend } from "resend";
+import { generateAdminEmailHtml, generateRegistrantEmailHtml } from "@/lib/emails";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const resend = new Resend(process.env.RESEND_API_KEY);
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || "ymgmovementaustralia@gmail.com";
 
 // Discount code configuration (must match frontend)
 interface DiscountCode {
@@ -184,52 +186,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe Checkout Session
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    
-    // Build product name based on registration type
-    let productName = "YMG Power Retreat 2026";
-    if (appliedDiscountCode) {
-      productName += ` - Discount (${appliedDiscountCode.code})`;
-    } else if (body.registration_type === "early_bird") {
-      productName += " - Early Bird Registration";
-    } else {
-      productName += " - Standard Registration";
+    // Send admin notification email (paid: false - registration pending payment)
+    try {
+      await resend.emails.send({
+        from: "YMG Registration <noreply@mail.ymgmovement.org.au>",
+        to: NOTIFICATION_EMAIL,
+        subject: `New Power Retreat Registration: ${registration.full_name}`,
+        html: generateAdminEmailHtml(registration as Record<string, unknown>, false),
+      });
+    } catch (emailError) {
+      console.error("Failed to send admin notification email:", emailError);
+      // Don't fail the registration if email fails
     }
-    
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "aud",
-            product_data: {
-              name: productName,
-              description: `Registration for ${body.full_name}`,
-            },
-            unit_amount: Math.round(expectedPrice * 100), // Stripe expects cents, round to handle decimals
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${baseUrl}/power-retreat-sign-up/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/power-retreat-sign-up/cancelled`,
-      customer_email: body.email,
-      metadata: {
-        registration_id: registration.id,
-        email: body.email,
-        discount_code: appliedDiscountCode?.code || "",
-      },
-    });
 
-    // Update registration with Stripe session ID
-    await supabaseAdmin
-      .from("registrations")
-      .update({ stripe_session_id: session.id })
-      .eq("id", registration.id);
+    // Send confirmation email to registrant
+    try {
+      await resend.emails.send({
+        from: "Young Men of God <noreply@mail.ymgmovement.org.au>",
+        to: registration.email,
+        replyTo: "ymgmovementaustralia@gmail.com",
+        subject: "Your Power Retreat Registration Confirmation",
+        html: generateRegistrantEmailHtml(),
+      });
+    } catch (emailError) {
+      console.error("Failed to send registrant confirmation email:", emailError);
+      // Don't fail the registration if email fails
+    }
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

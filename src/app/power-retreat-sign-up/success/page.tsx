@@ -25,7 +25,7 @@ export default function SuccessPage() {
             Registration Complete!
           </h1>
           <p className={`${inter.className} text-xl text-[var(--foreground-muted)] mb-8`}>
-            Thank you for registering for the YMG Power Retreat 2026. Your payment has been processed successfully.
+            Thank you for registering for the YMG Power Retreat 2026. Your registration has been received successfully. You will receive a payment link via email shortly.
           </p>
         </div>
 

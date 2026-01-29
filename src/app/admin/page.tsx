@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +103,28 @@ export default function AdminPage() {
   const formatVocation = (vocation?: string) => {
     if (!vocation) return "N/A";
     return vocation.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  const handleMarkAsPaid = async (reg: Registration) => {
+    if (reg.paid) return;
+    setMarkingPaidId(reg.id);
+    setError("");
+    try {
+      const response = await fetch(`/api/admin/registrations/${reg.id}`, {
+        method: "PATCH",
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update");
+      }
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === reg.id ? { ...r, paid: true } : r))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setMarkingPaidId(null);
+    }
   };
 
   if (!isAuthenticated) {
@@ -306,6 +329,17 @@ export default function AdminPage() {
                                 <div className={`${inter.className} text-sm space-y-1 text-[var(--foreground-muted)]`}>
                                   <p><span className="text-[var(--foreground)]">ID:</span> {reg.id}</p>
                                   <p><span className="text-[var(--foreground)]">Discount:</span> {reg.discount_code || "None"}</p>
+                                  <p><span className="text-[var(--foreground)]">Paid:</span> {reg.paid ? "Yes" : "Pending"}</p>
+                                  {!reg.paid && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMarkAsPaid(reg)}
+                                      disabled={markingPaidId === reg.id}
+                                      className="mt-3 px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                                    >
+                                      {markingPaidId === reg.id ? "Updating..." : "Mark as Paid"}
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             </div>

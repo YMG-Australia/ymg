@@ -278,10 +278,8 @@ export default function PowerRetreatSignUp() {
         throw new Error(data.error || "Registration failed");
       }
 
-      // Redirect to Stripe Checkout
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      // Redirect to success page
+      window.location.href = "/power-retreat-sign-up/success";
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Something went wrong");
       setIsSubmitting(false);
@@ -952,12 +950,7 @@ export default function PowerRetreatSignUp() {
             {/* Important Notice */}
             <div className="card p-4 mb-6 border-[var(--accent-primary)] border bg-[var(--accent-primary)]/10">
               <p className={`${inter.className} text-[var(--foreground)] text-sm`}>
-                <span className="font-semibold">⚠️ Important:</span> Once you click the button below, please complete the payment process. 
-                If you leave the payment page before completing, you will need to contact us at{" "}
-                <a href="mailto:ymgmovementaustralia@gmail.com" className="text-[var(--accent-primary)] underline">
-                  ymgmovementaustralia@gmail.com
-                </a>{" "}
-                to register again.
+                <span className="font-semibold">Important:</span> Your registration will be confirmed immediately. You will receive a payment link separately – we will be in touch via email.
               </p>
             </div>
 
@@ -966,7 +959,7 @@ export default function PowerRetreatSignUp() {
               disabled={isSubmitting}
               className="btn-primary w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Processing..." : `Proceed to Payment – $${currentPrice}`}
+              {isSubmitting ? "Processing..." : "Complete Registration"}
             </button>
           </form>
         </div>
