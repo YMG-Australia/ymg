@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
+  const [markingPendingId, setMarkingPendingId] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,6 +113,8 @@ export default function AdminPage() {
     try {
       const response = await fetch(`/api/admin/registrations/${reg.id}`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paid: true }),
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -124,6 +127,30 @@ export default function AdminPage() {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setMarkingPaidId(null);
+    }
+  };
+
+  const handleMarkAsPending = async (reg: Registration) => {
+    if (!reg.paid) return;
+    setMarkingPendingId(reg.id);
+    setError("");
+    try {
+      const response = await fetch(`/api/admin/registrations/${reg.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paid: false }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update");
+      }
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === reg.id ? { ...r, paid: false } : r))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setMarkingPendingId(null);
     }
   };
 
@@ -338,6 +365,16 @@ export default function AdminPage() {
                                       className="mt-3 px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                                     >
                                       {markingPaidId === reg.id ? "Updating..." : "Mark as Paid"}
+                                    </button>
+                                  )}
+                                  {reg.paid && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMarkAsPending(reg)}
+                                      disabled={markingPendingId === reg.id}
+                                      className="mt-3 px-4 py-2 bg-yellow-500/20 border border-yellow-500 text-yellow-400 rounded-lg hover:bg-yellow-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                                    >
+                                      {markingPendingId === reg.id ? "Updating..." : "Mark as Pending"}
                                     </button>
                                   )}
                                 </div>

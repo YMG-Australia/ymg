@@ -15,9 +15,18 @@ export async function PATCH(
       );
     }
 
+    const body = await request.json().catch(() => ({}));
+    const paid = body.paid;
+    if (typeof paid !== "boolean") {
+      return NextResponse.json(
+        { error: "Request body must include paid: true or paid: false" },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabaseAdmin
       .from("registrations")
-      .update({ paid: true })
+      .update({ paid })
       .eq("id", id)
       .select()
       .single();
