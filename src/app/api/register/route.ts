@@ -2,36 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, Registration } from "@/lib/supabase";
 import { Resend } from "resend";
 import { generateAdminEmailHtml, generateRegistrantEmailHtml } from "@/lib/emails";
+import { DISCOUNT_CODES, DiscountCode } from "@/lib/discountCodes";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || "ymgmovementaustralia@gmail.com";
 
-// Discount code configuration (must match frontend)
-interface DiscountCode {
-  code: string;
-  price: number;
-  validUntil?: Date;
-  description: string;
-}
-
-const DISCOUNT_CODES: DiscountCode[] = [
-  {
-    code: "SSE26",
-    price: 230,
-    validUntil: new Date("2026-01-31T23:59:59"),
-    description: "SSE26 discount",
-  },
-  {
-    code: "devtest123",
-    price: 1,
-    description: "Dev testing",
-  },
-  {
-    code: "PADRE",
-    price: 200,
-    description: "For Priests",
-  },
-];
 
 export async function POST(request: NextRequest) {
   try {

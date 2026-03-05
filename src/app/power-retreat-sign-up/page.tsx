@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cormorant, inter } from "@/components/ui/fonts";
+import { DISCOUNT_CODES, DiscountCode } from "@/lib/discountCodes";
 
 interface FormData {
   // Personal Info
@@ -72,32 +73,6 @@ const initialFormData: FormData = {
   marketing_consent: false,
 };
 
-// Discount code configuration
-interface DiscountCode {
-  code: string;
-  price: number;
-  validUntil?: Date;
-  description: string;
-}
-
-const DISCOUNT_CODES: DiscountCode[] = [
-  {
-    code: "SSE26",
-    price: 230,
-    validUntil: new Date("2026-01-31T23:59:59"),
-    description: "SSE26 discount",
-  },
-  {
-    code: "devtest123",
-    price: 1,
-    description: "Dev testing",
-  },
-  {
-    code: "PADRE",
-    price: 200,
-    description: "For Priests",
-  },
-];
 
 export default function PowerRetreatSignUp() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -108,6 +83,8 @@ export default function PowerRetreatSignUp() {
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
   const [discountError, setDiscountError] = useState("");
   const [discountSuccess, setDiscountSuccess] = useState("");
+  const [showCoCModal, setShowCoCModal] = useState(false);
+  const [cocModalAgreed, setCocModalAgreed] = useState(false);
 
   const now = new Date();
   const earlyBirdDeadline = new Date("2026-04-30T23:59:59");
@@ -220,9 +197,6 @@ export default function PowerRetreatSignUp() {
     if (!formData.confirms_18_or_older) {
       newErrors.confirms_18_or_older = "You must confirm you are 18 or older";
     }
-    if (!formData.agrees_to_code_of_conduct) {
-      newErrors.agrees_to_code_of_conduct = "You must agree to the code of conduct";
-    }
     if (!formData.photo_consent) {
       newErrors.photo_consent = "Please select a photo consent option";
     }
@@ -256,7 +230,17 @@ export default function PowerRetreatSignUp() {
       return;
     }
 
+    // Show the Code of Conduct modal before submitting
+    setCocModalAgreed(false);
+    setShowCoCModal(true);
+  };
+
+  const confirmAndSubmit = async () => {
+    if (!cocModalAgreed) return;
+
+    setShowCoCModal(false);
     setIsSubmitting(true);
+    setSubmitError("");
 
     try {
       const response = await fetch("/api/register", {
@@ -266,6 +250,7 @@ export default function PowerRetreatSignUp() {
         },
         body: JSON.stringify({
           ...formData,
+          agrees_to_code_of_conduct: true,
           registration_type: registrationType,
           amount_paid: currentPrice,
           discount_code: appliedDiscount?.code || null,
@@ -311,6 +296,99 @@ export default function PowerRetreatSignUp() {
 
   return (
     <div className="min-h-screen">
+      {/* Code of Conduct Modal */}
+      {showCoCModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowCoCModal(false)}
+          />
+          {/* Modal */}
+          <div className="relative bg-[var(--background)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="p-6 border-b border-[var(--border-subtle)]">
+              <h2 className={`${cormorant.className} text-2xl font-bold text-[var(--foreground)]`}>
+                Code of Conduct
+              </h2>
+              <p className={`${inter.className} text-[var(--foreground-muted)] text-sm mt-1`}>
+                Please read and agree to proceed with your registration.
+              </p>
+            </div>
+            {/* Scrollable content */}
+            <div className="p-6 overflow-y-auto flex-1">
+              <p className={`${inter.className} text-[var(--foreground-muted)] text-sm mb-4`}>
+                YMG is committed to creating a safe and respectful environment in line with Australian Catholic safeguarding standards.
+              </p>
+              <div className="mb-4">
+                <p className={`${inter.className} text-[var(--foreground)] font-semibold text-sm mb-2`}>Participants must:</p>
+                <ul className={`${inter.className} text-[var(--foreground-muted)] text-sm space-y-1 list-none`}>
+                  {[
+                    "Respect the dignity and rights of all individuals",
+                    "Maintain appropriate physical and emotional boundaries",
+                    "Avoid any form of bullying, harassment, or discrimination",
+                    "Follow instructions of leaders and safeguarding officers",
+                    "Report any concerns or incidents immediately",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="text-[var(--accent-primary)] mt-0.5">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mb-4">
+                <p className={`${inter.className} text-[var(--foreground)] font-semibold text-sm mb-2`}>Prohibited behaviours:</p>
+                <ul className={`${inter.className} text-[var(--foreground-muted)] text-sm space-y-1 list-none`}>
+                  {[
+                    "Abuse or misconduct of any kind",
+                    "Use of alcohol, drugs, or unsafe behaviour",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="text-red-400 mt-0.5">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <p className={`${inter.className} text-[var(--foreground-muted)] text-sm italic`}>
+                YMG reserves the right to remove participants who breach these standards.
+              </p>
+            </div>
+            {/* Footer */}
+            <div className="p-6 border-t border-[var(--border-subtle)] space-y-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cocModalAgreed}
+                  onChange={(e) => setCocModalAgreed(e.target.checked)}
+                  className="w-5 h-5 mt-0.5 accent-[var(--accent-primary)] flex-shrink-0"
+                />
+                <span className={`${inter.className} text-[var(--foreground)] text-sm`}>
+                  I have read and agree to abide by the YMG Code of Conduct. <span className="text-red-400">*</span>
+                </span>
+              </label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCoCModal(false)}
+                  className={`${inter.className} flex-1 py-3 px-4 border border-[var(--border-subtle)] rounded-lg text-[var(--foreground-muted)] hover:border-[var(--foreground-muted)] transition-colors text-sm`}
+                >
+                  Go Back
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmAndSubmit}
+                  disabled={!cocModalAgreed || isSubmitting}
+                  className="flex-1 btn-primary py-3 px-4 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Processing..." : "Confirm & Register"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Hero Section */}
       <section className="relative py-16 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-[var(--gradient-radial)] pointer-events-none" />
@@ -867,19 +945,9 @@ export default function PowerRetreatSignUp() {
                 </label>
                 {errors.confirms_18_or_older && <p className={errorClasses}>{errors.confirms_18_or_older}</p>}
 
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="agrees_to_code_of_conduct"
-                    checked={formData.agrees_to_code_of_conduct}
-                    onChange={handleInputChange}
-                    className="w-5 h-5 mt-0.5 accent-[var(--accent-primary)]"
-                  />
-                  <span className={`${inter.className} text-[var(--foreground)]`}>
-                    I agree to follow the code of conduct and event guidelines. <span className="text-red-400">*</span>
-                  </span>
-                </label>
-                {errors.agrees_to_code_of_conduct && <p className={errorClasses}>{errors.agrees_to_code_of_conduct}</p>}
+                <p className={`${inter.className} text-[var(--foreground-muted)] text-sm`}>
+                  You will be asked to read and agree to our Code of Conduct in the next step.
+                </p>
               </div>
             </div>
 
