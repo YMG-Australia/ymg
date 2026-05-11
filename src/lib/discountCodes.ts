@@ -24,8 +24,8 @@ export const DISCOUNT_CODES: DiscountCode[] = [
   },
   {
     code: "MelYMG",
-    price: 230,
+    price: 250,
     description: "Melbourne YMG discount",
-    validUntil: new Date("2026-04-01T23:59:59"),
+    validUntil: new Date("2026-06-01T23:59:59"),
   },
 ];
