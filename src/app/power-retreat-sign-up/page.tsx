@@ -342,7 +342,7 @@ export default function PowerRetreatSignUp() {
                 <ul className={`${inter.className} text-[var(--foreground-muted)] text-sm space-y-1 list-none`}>
                   {[
                     "Abuse or misconduct of any kind",
-                    "Use of alcohol, drugs, or unsafe behaviour",
+                    "Use of alcohol, drugs, or any unsafe behaviour",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2">
                       <span className="text-red-400 mt-0.5">•</span>
