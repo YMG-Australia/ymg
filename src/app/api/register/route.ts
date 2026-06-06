@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Determine price based on date and discount code
     const now = new Date();
     const earlyBirdDeadline = new Date("2026-04-30T23:59:59");
-    const basePrice = now <= earlyBirdDeadline ? 250 : 300;
+    const basePrice = 250;
     
     let expectedPrice = basePrice;
     let appliedDiscountCode: DiscountCode | null = null;

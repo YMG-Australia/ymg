@@ -95,7 +95,7 @@ export default function PowerRetreatSignUp() {
   const isStandardAvailable = now >= standardStart && now <= registrationClose;
   const isRegistrationOpen = now <= registrationClose;
 
-  const basePrice = isEarlyBirdAvailable ? 250 : 300;
+  const basePrice = 250;
   const currentPrice = appliedDiscount ? appliedDiscount.price : basePrice;
   const registrationType = appliedDiscount 
     ? `discount_${appliedDiscount.code.toLowerCase()}` 
@@ -428,7 +428,7 @@ export default function PowerRetreatSignUp() {
                   🚨 Early bird pricing available only until April 30th! 🚨
                 </p>
                 <p className={`${inter.className} text-[var(--foreground-muted)] mt-2`}>
-                  Standard pricing is $300
+                  Standard pricing is $250
                 </p>
               </div>
 
