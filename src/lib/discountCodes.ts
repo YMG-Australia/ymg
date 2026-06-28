@@ -24,7 +24,7 @@ export const DISCOUNT_CODES: DiscountCode[] = [
   },
   {
     code: "BallaratYMG",
-    price: 250,
+    price: 230,
     description: "Ballarat YMG discount",
     validUntil: new Date("2026-07-06T23:59:59"),
   },
