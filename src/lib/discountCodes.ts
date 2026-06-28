@@ -23,9 +23,9 @@ export const DISCOUNT_CODES: DiscountCode[] = [
     description: "For Priests",
   },
   {
-    code: "MelYMG",
+    code: "BallaratYMG",
     price: 250,
-    description: "Melbourne YMG discount",
-    validUntil: new Date("2026-06-01T23:59:59"),
+    description: "Ballarat YMG discount",
+    validUntil: new Date("2026-07-06T23:59:59"),
   },
 ];

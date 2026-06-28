@@ -25,7 +25,7 @@ export default function Announcement() {
         </h2>
 
         {/* Image */}
-        <div className="card overflow-hidden mb-8">
+        {/* <div className="card overflow-hidden mb-8">
           <CldImage
             alt="YMG Melbourne Conference 2026"
             src="ymgPowerVertical_w56fyd"
@@ -35,7 +35,10 @@ export default function Announcement() {
             blurDataURL={getBlurDataUrl("ymgPowerVertical_w56fyd")}
             className="w-full h-auto"
           />
-        </div>
+        </div> */}
+        <h1 className={`${cormorant.className} text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-8`}>
+        YMG Power Retreat 2026
+        </h1>
 
         {/* Description */}
         <p className={`${inter.className} text-[var(--foreground-muted)] leading-relaxed mb-8`}>
