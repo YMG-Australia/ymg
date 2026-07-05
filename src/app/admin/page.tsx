@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { cormorant, inter } from "@/components/ui/fonts";
 
 interface Registration {
@@ -48,6 +48,10 @@ export default function AdminPage() {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [markingPaidId, setMarkingPaidId] = useState<string | null>(null);
   const [markingPendingId, setMarkingPendingId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"name" | "age" | "registered">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [dietaryFilter, setDietaryFilter] = useState<"all" | "has" | "none">("all");
+  const [dietarySearch, setDietarySearch] = useState("");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +109,69 @@ export default function AdminPage() {
     if (!vocation) return "N/A";
     return vocation.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
+
+  const calculateAge = (dateOfBirth: string) => {
+    const birthDate = new Date(dateOfBirth);
+    if (Number.isNaN(birthDate.getTime())) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+
+    return age;
+  };
+
+  const formatDietary = (registration: Registration) => {
+    const dietary = registration.dietary_requirements?.trim();
+
+    if (!dietary) return "None";
+
+    return registration.dietary_other ? `${dietary} (${registration.dietary_other})` : dietary;
+  };
+
+  const filteredAndSortedRegistrations = useMemo(() => {
+    const dietaryQueryLower = dietarySearch.trim().toLowerCase();
+
+    const filtered = registrations.filter((registration) => {
+      const dietaryText = `${registration.dietary_requirements} ${registration.dietary_other || ""}`.trim().toLowerCase();
+      const hasDietaryRequirements = dietaryText.length > 0 && dietaryText !== "none" && dietaryText !== "no";
+
+      if (dietaryFilter === "has" && !hasDietaryRequirements) return false;
+      if (dietaryFilter === "none" && hasDietaryRequirements) return false;
+      if (dietaryQueryLower && !dietaryText.includes(dietaryQueryLower)) return false;
+
+      return true;
+    });
+
+    return filtered.sort((left, right) => {
+      let comparison = 0;
+
+      if (sortBy === "name") {
+        comparison = left.full_name.localeCompare(right.full_name);
+      } else if (sortBy === "age") {
+        const leftAge = calculateAge(left.date_of_birth);
+        const rightAge = calculateAge(right.date_of_birth);
+
+        if (leftAge === null && rightAge === null) {
+          comparison = 0;
+        } else if (leftAge === null) {
+          comparison = 1;
+        } else if (rightAge === null) {
+          comparison = -1;
+        } else {
+          comparison = leftAge - rightAge;
+        }
+      } else {
+        comparison = new Date(left.created_at).getTime() - new Date(right.created_at).getTime();
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [dietaryFilter, dietarySearch, registrations, sortBy, sortDirection]);
 
   const handleMarkAsPaid = async (reg: Registration) => {
     if (reg.paid) return;
@@ -218,6 +285,62 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Controls */}
+        <div className="card p-4 mb-8 grid grid-cols-1 gap-4 lg:grid-cols-4">
+          <div>
+            <label className={`${inter.className} block text-sm font-medium text-[var(--foreground)] mb-2`}>
+              Sort by
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "name" | "age" | "registered")}
+              className="w-full px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
+            >
+              <option value="name">Name</option>
+              <option value="age">Age</option>
+              <option value="registered">Registered date</option>
+            </select>
+          </div>
+          <div>
+            <label className={`${inter.className} block text-sm font-medium text-[var(--foreground)] mb-2`}>
+              Sort direction
+            </label>
+            <button
+              type="button"
+              onClick={() => setSortDirection((current) => (current === "asc" ? "desc" : "asc"))}
+              className="w-full px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] hover:border-[var(--accent-primary)] transition-colors text-left"
+            >
+              {sortDirection === "asc" ? "Ascending" : "Descending"}
+            </button>
+          </div>
+          <div>
+            <label className={`${inter.className} block text-sm font-medium text-[var(--foreground)] mb-2`}>
+              Dietary filter
+            </label>
+            <select
+              value={dietaryFilter}
+              onChange={(e) => setDietaryFilter(e.target.value as "all" | "has" | "none")}
+              className="w-full px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
+            >
+              <option value="all">All registrations</option>
+              <option value="has">Has dietary requirements</option>
+              <option value="none">No dietary requirements</option>
+            </select>
+          </div>
+          <div>
+            <label className={`${inter.className} block text-sm font-medium text-[var(--foreground)] mb-2`}>
+              Dietary search
+            </label>
+            <input
+              type="text"
+              value={dietarySearch}
+              onChange={(e) => setDietarySearch(e.target.value)}
+              className="w-full px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
+              placeholder="e.g. vegetarian, gluten free"
+            />
+          </div>
+        </div>
+
         {/* Error State */}
         {error && (
           <div className="card p-4 mb-8 border-red-500 border bg-red-500/10">
@@ -233,15 +356,17 @@ export default function AdminPage() {
         )}
 
         {/* Table */}
-        {!loading && registrations.length > 0 && (
+        {!loading && filteredAndSortedRegistrations.length > 0 && (
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[var(--border-subtle)] bg-[var(--background-secondary)]">
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Name</th>
+                    <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Age</th>
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Email</th>
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Location</th>
+                    <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Dietary</th>
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Type</th>
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Amount</th>
                     <th className={`${inter.className} text-left px-4 py-3 text-[var(--foreground)] font-semibold text-sm`}>Paid</th>
@@ -250,16 +375,21 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {registrations.map((reg) => (
-                    <>
+                  {filteredAndSortedRegistrations.map((reg) => (
+                    <Fragment key={reg.id}>
                       <tr 
-                        key={reg.id} 
                         className="border-b border-[var(--border-subtle)] hover:bg-[var(--background-secondary)]/50 transition-colors"
                       >
                         <td className={`${inter.className} px-4 py-3 text-[var(--foreground)]`}>{reg.full_name}</td>
+                        <td className={`${inter.className} px-4 py-3 text-[var(--foreground-muted)] text-sm`}>
+                          {calculateAge(reg.date_of_birth) ?? "N/A"}
+                        </td>
                         <td className={`${inter.className} px-4 py-3 text-[var(--foreground-muted)] text-sm`}>{reg.email}</td>
                         <td className={`${inter.className} px-4 py-3 text-[var(--foreground-muted)] text-sm`}>
                           {reg.city_suburb}, {reg.state}
+                        </td>
+                        <td className={`${inter.className} px-4 py-3 text-[var(--foreground-muted)] text-sm`}>
+                          {formatDietary(reg)}
                         </td>
                         <td className={`${inter.className} px-4 py-3 text-sm`}>
                           <span className={`px-2 py-1 rounded text-xs ${
@@ -383,7 +513,7 @@ export default function AdminPage() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
@@ -395,6 +525,13 @@ export default function AdminPage() {
         {!loading && registrations.length === 0 && !error && (
           <div className="text-center py-12">
             <p className={`${inter.className} text-[var(--foreground-muted)]`}>No registrations yet.</p>
+          </div>
+        )}
+        {!loading && registrations.length > 0 && filteredAndSortedRegistrations.length === 0 && !error && (
+          <div className="text-center py-12">
+            <p className={`${inter.className} text-[var(--foreground-muted)]`}>
+              No registrations match the current sort or dietary filters.
+            </p>
           </div>
         )}
       </div>
