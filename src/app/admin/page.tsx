@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { cormorant, inter } from "@/components/ui/fonts";
+import * as XLSX from "xlsx";
 
 interface Registration {
   id: string;
@@ -131,6 +132,62 @@ export default function AdminPage() {
     if (!dietary) return "None";
 
     return registration.dietary_other ? `${dietary} (${registration.dietary_other})` : dietary;
+  };
+
+  const buildExportRows = (rows: Registration[]) => {
+    return rows.map((registration) => ({
+      ID: registration.id,
+      Name: registration.full_name,
+      Age: calculateAge(registration.date_of_birth) ?? "",
+      "Date of birth": registration.date_of_birth,
+      Email: registration.email,
+      "Mobile number": registration.mobile_number,
+      City: registration.city_suburb,
+      State: registration.state,
+      Country: registration.country,
+      "Dietary requirements": registration.dietary_requirements,
+      "Dietary other": registration.dietary_other || "",
+      "Dietary summary": formatDietary(registration),
+      "Medical conditions": registration.medical_conditions,
+      "Medical details": registration.medical_details || "",
+      "Emergency contact name": registration.emergency_contact_name,
+      "Emergency contact relationship": registration.emergency_contact_relationship,
+      "Emergency contact phone": registration.emergency_contact_phone,
+      "Vocation status": registration.vocation_status || "",
+      "Is Catholic": registration.is_catholic || "",
+      Parish: registration.parish || "",
+      "First YMG event": registration.first_ymg_event || "",
+      "How heard": registration.how_heard || "",
+      "How heard other": registration.how_heard_other || "",
+      "Confirms 18 or older": registration.confirms_18_or_older ? "Yes" : "No",
+      "Agrees to code of conduct": registration.agrees_to_code_of_conduct ? "Yes" : "No",
+      "Photo consent": registration.photo_consent ? "Yes" : "No",
+      "Marketing consent": registration.marketing_consent ? "Yes" : "No",
+      "Registration type": registration.registration_type,
+      "Amount paid": registration.amount_paid,
+      Paid: registration.paid ? "Yes" : "No",
+      "Discount code": registration.discount_code || "",
+      "Registered at": registration.created_at,
+    }));
+  };
+
+  const handleDownloadExcel = () => {
+    try {
+      if (registrations.length === 0) {
+        setError("No registrations available to export");
+        return;
+      }
+
+      setError("");
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(buildExportRows(registrations));
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
+
+      const fileName = `ymg-registrations-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+    } catch (exportError) {
+      setError(exportError instanceof Error ? exportError.message : "Failed to export registrations");
+    }
   };
 
   const filteredAndSortedRegistrations = useMemo(() => {
@@ -267,6 +324,13 @@ export default function AdminPage() {
             </p>
           </div>
           <div className="flex gap-4">
+            <button
+              onClick={handleDownloadExcel}
+              disabled={registrations.length === 0}
+              className="px-4 py-2 bg-green-500/20 border border-green-500 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Download Excel
+            </button>
             <button
               onClick={fetchRegistrations}
               className="px-4 py-2 bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)] text-[var(--accent-primary)] rounded-lg hover:bg-[var(--accent-primary)]/30 transition-colors"
