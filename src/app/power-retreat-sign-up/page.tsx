@@ -89,7 +89,7 @@ export default function PowerRetreatSignUp() {
   const now = new Date();
   const earlyBirdDeadline = new Date("2026-04-30T23:59:59");
   const standardStart = new Date("2026-05-01T00:00:00");
-  const registrationClose = new Date("2026-06-30T23:59:59");
+  const registrationClose = new Date("2026-07-20T23:59:59");
   
   const isEarlyBirdAvailable = now <= earlyBirdDeadline;
   const isStandardAvailable = now >= standardStart && now <= registrationClose;
