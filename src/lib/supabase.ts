@@ -55,4 +55,6 @@ export interface Registration {
   paid: boolean;
   stripe_session_id?: string;
   discount_code?: string;
+  power_talk?: string | null;
+  power_talk_assigned_at?: string | null;
 }
