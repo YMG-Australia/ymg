@@ -19,6 +19,7 @@ export default function PowerAllocatedPage() {
   const [error, setError] = useState("");
   const [undoingRegistrationId, setUndoingRegistrationId] = useState<string | null>(null);
   const [nameSearch, setNameSearch] = useState("");
+  const [showAllocationText, setShowAllocationText] = useState(false);
 
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
@@ -127,6 +128,34 @@ export default function PowerAllocatedPage() {
 
   const totalAllocated = registrations.filter((registration) => registration.power_talk).length;
 
+  const allocationText = useMemo(() => {
+    return POWER_TALKS.map((talk) => {
+      const people = allocatedByTalk[talk.id].map((registration) => registration.full_name);
+      const lines = [
+        `${POWER_TALK_LABELS[talk.id]} (${people.length})`,
+        ...(people.length > 0 ? people.map((person) => `- ${person}`) : ["- None"]),
+      ];
+
+      return lines.join("\n");
+    }).join("\n\n");
+  }, [allocatedByTalk]);
+
+  const copyAllocationText = async () => {
+    try {
+      await navigator.clipboard.writeText(allocationText);
+    } catch {
+      const textArea = document.createElement("textarea");
+      textArea.value = allocationText;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
@@ -222,6 +251,41 @@ export default function PowerAllocatedPage() {
             placeholder="Type a name to filter allocated people"
             className="w-full px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors"
           />
+        </div>
+
+        <div className="card p-4 mb-6">
+          <button
+            type="button"
+            onClick={() => setShowAllocationText((current) => !current)}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--background-secondary)] hover:border-[var(--accent-primary)] transition-colors"
+          >
+            <span className={`${inter.className} font-medium text-[var(--foreground)]`}>
+              {showAllocationText ? "Hide copyable allocation text" : "Show copyable allocation text"}
+            </span>
+            <span className={`${inter.className} text-sm text-[var(--foreground-muted)]`}>
+              {showAllocationText ? "Open" : "Closed"}
+            </span>
+          </button>
+
+          {showAllocationText && (
+            <div className="mt-4 space-y-3">
+              <p className={`${inter.className} text-sm text-[var(--foreground-muted)]`}>
+                Copy this plain text into a message, spreadsheet, or document.
+              </p>
+              <textarea
+                readOnly
+                value={allocationText}
+                className="w-full min-h-72 px-4 py-3 bg-[var(--background)] border border-[var(--border-subtle)] rounded-lg text-[var(--foreground)] font-mono text-sm whitespace-pre-wrap focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={copyAllocationText}
+                className="px-4 py-2 rounded-lg border border-[var(--accent-primary)] text-[var(--accent-primary)] bg-[var(--accent-primary)]/10 hover:bg-[var(--accent-primary)]/20 transition-colors"
+              >
+                Copy text
+              </button>
+            </div>
+          )}
         </div>
 
         {error && (
