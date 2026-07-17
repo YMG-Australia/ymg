@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cormorant, inter } from "@/components/ui/fonts";
-import { POWER_TALK_LABELS, POWER_TALK_LIMIT, POWER_TALKS, type PowerTalkId } from "@/lib/powerTalks";
+import { POWER_TALK_LABELS, POWER_TALKS, getPowerTalkLimit, type PowerTalkId } from "@/lib/powerTalks";
 import type { Registration } from "@/lib/supabase";
 
 const ADMIN_PASSWORD = "iloveJesus123";
@@ -225,6 +225,7 @@ export default function PowerAllocatedPage() {
           <div className="grid grid-cols-2 gap-3 w-full md:w-auto md:min-w-[360px]">
             {POWER_TALKS.map((talk) => {
               const count = allocatedByTalk[talk.id].length;
+              const limit = getPowerTalkLimit(talk.id);
 
               return (
                 <div key={talk.id} className="card p-4">
@@ -232,7 +233,7 @@ export default function PowerAllocatedPage() {
                     {POWER_TALK_LABELS[talk.id]}
                   </div>
                   <div className={`${cormorant.className} text-2xl font-bold text-[var(--foreground)] mt-1`}>
-                    {count}/{POWER_TALK_LIMIT}
+                    {count}/{limit}
                   </div>
                 </div>
               );
@@ -310,7 +311,7 @@ export default function PowerAllocatedPage() {
                       {POWER_TALK_LABELS[talk.id]}
                     </h2>
                     <p className={`${inter.className} text-[var(--foreground-muted)] text-sm`}>
-                      {allocatedByTalk[talk.id].length}/{POWER_TALK_LIMIT} allocated
+                      {allocatedByTalk[talk.id].length}/{getPowerTalkLimit(talk.id)} allocated
                     </p>
                   </div>
                 </div>

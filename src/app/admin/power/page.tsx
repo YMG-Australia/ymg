@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { cormorant, inter } from "@/components/ui/fonts";
-import { POWER_TALK_LABELS, POWER_TALK_LIMIT, POWER_TALKS, type PowerTalkId } from "@/lib/powerTalks";
+import { POWER_TALK_LABELS, POWER_TALKS, getPowerTalkLimit, type PowerTalkId } from "@/lib/powerTalks";
 import type { Registration } from "@/lib/supabase";
 
 const ADMIN_PASSWORD = "iloveJesus123";
@@ -206,7 +206,7 @@ export default function PowerAdminPage() {
                   {POWER_TALK_LABELS[talk.id]}
                 </div>
                 <div className={`${cormorant.className} text-2xl font-bold text-[var(--foreground)] mt-1`}>
-                  {talkCounts[talk.id]}/{POWER_TALK_LIMIT}
+                  {talkCounts[talk.id]}/{getPowerTalkLimit(talk.id)}
                 </div>
               </div>
             ))}
@@ -262,7 +262,8 @@ export default function PowerAdminPage() {
                     <div className="px-5 pb-5">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {POWER_TALKS.map((talk) => {
-                          const isFull = talkCounts[talk.id] >= POWER_TALK_LIMIT;
+                          const limit = getPowerTalkLimit(talk.id);
+                          const isFull = talkCounts[talk.id] >= limit;
                           const isSelected = selectedTalkByRegistration[registration.id || ""] === talk.id;
 
                           return (
@@ -289,7 +290,7 @@ export default function PowerAdminPage() {
                                 {POWER_TALK_LABELS[talk.id]}
                               </span>
                               <span className={`${inter.className} text-xs text-[var(--foreground-muted)] mt-2`}>
-                                {talkCounts[talk.id]}/{POWER_TALK_LIMIT} spots
+                                {talkCounts[talk.id]}/{limit} spots
                               </span>
                               {isFull && (
                                 <span className={`${inter.className} absolute inset-0 flex items-center justify-center text-sm font-bold tracking-widest text-[var(--foreground-muted)]`}>

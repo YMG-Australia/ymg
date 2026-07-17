@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { POWER_TALK_LIMIT, isPowerTalkId } from "@/lib/powerTalks";
+import { getPowerTalkLimit, isPowerTalkId } from "@/lib/powerTalks";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -50,7 +50,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       );
     }
 
-    if ((count || 0) >= POWER_TALK_LIMIT) {
+    if ((count || 0) >= getPowerTalkLimit(powerTalk as Parameters<typeof getPowerTalkLimit>[0])) {
       return NextResponse.json(
         { error: "That talk is already full" },
         { status: 409 }
