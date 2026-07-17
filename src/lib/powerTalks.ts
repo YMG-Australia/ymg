@@ -10,10 +10,10 @@ export const POWER_TALK_LIMIT = 25;
 export type PowerTalkId = (typeof POWER_TALKS)[number]["id"];
 
 export const POWER_TALK_LABELS: Record<PowerTalkId, string> = {
-  talk_1: "Talk 1 by A",
-  talk_2: "Talk 2 by B",
-  talk_3: "Talk 3 by C",
-  talk_4: "Talk 4 by D",
+  talk_1: "Set Free! by Joshua Angrisano",
+  talk_2: "How to discern God’s call on your life by Fr Ken MGL",
+  talk_3: "The Blessings and Challenges of Married life by Karen Doyle",
+  talk_4: "Courageous forgiveness by Samuel Clear",
 };
 
 export const isPowerTalkId = (value: string): value is PowerTalkId => {
