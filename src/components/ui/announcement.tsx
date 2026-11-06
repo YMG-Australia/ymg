@@ -1,19 +1,6 @@
 "use client";
 
-import { CldImage, getCldImageUrl } from "next-cloudinary";
-import Link from "next/link";
 import { cormorant, inter } from "./fonts";
-
-// Generate blur placeholder URL using Cloudinary transformations
-function getBlurDataUrl(src: string): string {
-  return getCldImageUrl({
-    src,
-    width: 10,
-    height: 10,
-    quality: 1,
-    effects: [{ blur: "1000" }],
-  });
-}
 
 export default function Announcement() {
   return (
@@ -21,7 +8,7 @@ export default function Announcement() {
       <div className="max-w-xl mx-auto text-center">
         {/* Heading */}
         <h2 className={`${cormorant.className} text-4xl sm:text-5xl font-bold text-[var(--foreground)] mb-8`}>
-        🚨 New YMG Event! 🚨
+          🚨 New YMG Event! 🚨
         </h2>
 
         {/* Image */}
@@ -37,18 +24,23 @@ export default function Announcement() {
           />
         </div> */}
         <h1 className={`${cormorant.className} text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-8`}>
-        YMG Power Retreat 2026
+          Trivia Night Fundraiser - Hosted by YMG
         </h1>
 
         {/* Description */}
         <p className={`${inter.className} text-[var(--foreground-muted)] leading-relaxed mb-8`}>
-        A men's weekend getaway to power-up mid year, deepen in faith, strengthen brotherhood, and grow in leadership. A power-packed line up of inspiring speakers, fellowship and food. Give God permission to lead you on the path of authentic, Christ-centered living.
+          Join us for a fun-filled trivia night fundraiser on Saturday 21 November 2026 at St Scholastica&apos;s School Hall in Bennettswood. Expect trivia, games, food, raffles and prizes while helping raise funds for mission work in Manila and Mindoro.
         </p>
 
         {/* Sign Up Button */}
-        <Link href="/power-retreat-sign-up" className="btn-primary inline-block">
-          Sign Up
-        </Link>
+        <a
+          href="https://www.trybooking.com/au/event/young-men-of-god-trivia-night-1660083"
+          target="_blank"
+          rel="noreferrer"
+          className="btn-primary inline-block"
+        >
+          Get Tickets
+        </a>
       </div>
     </section>
   );
